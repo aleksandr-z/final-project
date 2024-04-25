@@ -6,7 +6,9 @@ import 'dotenv/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('/internship/v1/');
-
+  app.enableCors({
+    origin: '*',
+  });
   const config = new DocumentBuilder()
     .setTitle('Аренда автомобилей')
     .setDescription('API сервиса аренды авто')
