@@ -36,7 +36,6 @@ export class ProposalService {
         }, t)
       }
     } catch {
-      console.log('2222')
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -71,6 +70,26 @@ export class ProposalService {
     }
 
     return results;
+  }
+
+  async deleteProposal(proposalId: number, request: Request){
+    const user = await this.getUser(request);
+    const proposalDB = await this.proposalModel.findOne({
+      where: {
+        id: proposalId,
+        userId: user.id
+      }
+    });
+    if(!proposalDB){
+      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+    }
+    await this.proposalModel.destroy({
+      where: {
+        id: proposalId,
+        userId: user.id
+      }
+    })
+    return;
   }
 
   async getProposal(proposalId: number, request: Request){
@@ -207,12 +226,14 @@ export class ProposalService {
 
   private async changeStatus(proposalId: number, request: Request, status: STATUS_CODES, canChangeStatus = false){
     const user = await this.getUser(request);
+
     const proposalDB = await this.proposalModel.findOne({
       where: {
         id: proposalId,
         userId: user.id
       }
     });
+
     if(!proposalDB){
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }

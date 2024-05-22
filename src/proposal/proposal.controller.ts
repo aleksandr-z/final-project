@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, Put, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Param, Post, Request, UseGuards, Delete } from '@nestjs/common';
 import { ProposalService } from './proposal.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { ProposalDto, STATUS_CODES } from './dto/proposal.dto';
@@ -25,7 +25,20 @@ export class ProposalController {
   }
 
   @ApiOperation({
-    description: 'Отправка заявки на рассмотрение'
+    description: 'Удаление заявки'
+  })
+  @ApiParam({ name: 'proposalId' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 401, description: 'Unauthorized.'})
+  @UseGuards(AuthGuard)
+  @Delete('/proposal/:proposalId')
+  deleteProposal(@Param('proposalId') proposalId: number, @Request() request){
+    return this.proposalService.deleteProposal(proposalId, request)
+  }
+
+
+  @ApiOperation({
+    description: 'Отправка заявки на рассмотрение (перевод в статус PENDING)'
   })
   @ApiParam({ name: 'proposalId' })
   @ApiResponse({ status: 200 })
