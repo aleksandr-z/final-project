@@ -59,16 +59,19 @@ export class UsersService {
 
   async createUser(login: string, password: string, request: Request){
     const token = this.extractTokenFromHeader(request);
-    const payload = await this.jwtService.verifyAsync(
-      token,
-      {
-        secret: config.get('SECRET')
-      }
-    );
+    let payload;
+    try {
+      payload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: config.get('SECRET')
+        }
+      );
+    } catch {
+      throw new UnauthorizedException();
+    }
     if(payload.username === 'zvyagin'){
-      console.log(password);
       const pass = await encodePassword(password);
-      console.log(pass);
       const user = new User({
         login,
         password: pass,
@@ -78,6 +81,5 @@ export class UsersService {
     } else {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
-
   }
 }

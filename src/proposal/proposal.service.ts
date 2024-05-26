@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Proposal } from './proposal.model';
 import { ProposalDto, STATUS_CODES } from './dto/proposal.dto';
@@ -210,18 +210,22 @@ export class ProposalService {
 
   private async getUser(request: Request) {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    const payload = await this.jwtService.verifyAsync(
-      token,
-      {
-        secret: config.get('SECRET')
-      }
-    );
-    const user = await this.userModel.findOne({
-      where: {
-        login: payload.username
-      }
-    });
-    return user;
+    try {
+      const payload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: config.get('SECRET')
+        }
+      );
+      const user = await this.userModel.findOne({
+        where: {
+          login: payload.username
+        }
+      });
+      return user;
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 
   private async changeStatus(proposalId: number, request: Request, status: STATUS_CODES, canChangeStatus = false){
