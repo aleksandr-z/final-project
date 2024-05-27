@@ -26,8 +26,8 @@ export class ProposalService {
   ) {}
 
   async send(proposalId: number, request: Request){
+    const res = await this.changeStatus(proposalId, request, STATUS_CODES.PENDING);
     try {
-      const res = await this.changeStatus(proposalId, request, STATUS_CODES.PENDING);
       if(res){
         const t = randomMinute(1, 3);
         setTimeout(() => {
@@ -44,6 +44,7 @@ export class ProposalService {
 
   async getStatus(proposalId: number, request: Request){
     const user = await this.getUser(request);
+    console.log(user);
     const proposalDB = await this.proposalModel.findOne({
       where: {
         id: proposalId,
@@ -211,11 +212,8 @@ export class ProposalService {
   private async getUser(request: Request) {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: config.get('SECRET')
-        }
+      const payload = this.jwtService.decode(
+        token
       );
       const user = await this.userModel.findOne({
         where: {
