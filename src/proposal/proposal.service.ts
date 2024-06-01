@@ -222,7 +222,7 @@ export class ProposalService {
       });
       return user;
     } catch {
-      throw new UnauthorizedException();
+      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
     }
   }
 
