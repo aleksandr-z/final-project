@@ -237,6 +237,9 @@ export class ProposalService {
     });
 
     if(!proposalDB){
+      if(canChangeStatus){
+        return;
+      }
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
 
